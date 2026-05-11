@@ -22,6 +22,7 @@ type ApiGroup struct {
 	AutoCodeHistoryApi
 	AutoCodeTemplateApi
 	SysParamsApi
+	FofaApi
 	SysVersionApi
 	SysErrorApi
 	LoginLogApi
@@ -43,6 +44,7 @@ var (
 	authorityBtnService      = service.ServiceGroupApp.SystemServiceGroup.AuthorityBtnService
 	systemConfigService      = service.ServiceGroupApp.SystemServiceGroup.SystemConfigService
 	sysParamsService         = service.ServiceGroupApp.SystemServiceGroup.SysParamsService
+	fofaService              = service.ServiceGroupApp.SystemServiceGroup.FofaService
 	operationRecordService   = service.ServiceGroupApp.SystemServiceGroup.OperationRecordService
 	dictionaryDetailService  = service.ServiceGroupApp.SystemServiceGroup.DictionaryDetailService
 	autoCodeService          = service.ServiceGroupApp.SystemServiceGroup.AutoCodeService

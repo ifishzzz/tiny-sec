@@ -17,6 +17,7 @@ type ServiceGroup struct {
 	AuthorityBtnService
 	SysExportTemplateService
 	SysParamsService
+	FofaService
 	SysVersionService
 	SkillsService
 	AIWorkflowSession aiWorkflowSession

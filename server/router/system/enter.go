@@ -19,6 +19,7 @@ type RouterGroup struct {
 	AuthorityBtnRouter
 	SysExportTemplateRouter
 	SysParamsRouter
+	FofaRouter
 	SysVersionRouter
 	SysErrorRouter
 	LoginLogRouter
@@ -33,6 +34,7 @@ var (
 	casbinApi            = api.ApiGroupApp.SystemApiGroup.CasbinApi
 	systemApi            = api.ApiGroupApp.SystemApiGroup.SystemApi
 	sysParamsApi         = api.ApiGroupApp.SystemApiGroup.SysParamsApi
+	fofaApi              = api.ApiGroupApp.SystemApiGroup.FofaApi
 	autoCodeApi          = api.ApiGroupApp.SystemApiGroup.AutoCodeApi
 	authorityApi         = api.ApiGroupApp.SystemApiGroup.AuthorityApi
 	apiRouterApi         = api.ApiGroupApp.SystemApiGroup.SystemApiApi
