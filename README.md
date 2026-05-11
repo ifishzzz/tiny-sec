@@ -1,4 +1,3 @@
-
 <div align=center>
 <img src="http://qmplusimg.henrongyi.top/gvalogo.jpg" width="300" height="300" />
 </div>
@@ -41,12 +40,12 @@
   </tr>
 </table>
 
-
 # 项目文档
-[在线文档](https://www.gin-vue-admin.com) : https://www.gin-vue-admin.com
+
+[在线文档](https://www.gin-vue-admin.com) : <https://www.gin-vue-admin.com>
 
 [初始化](https://www.gin-vue-admin.com/guide/start-quickly/initialization.html)
-						       
+
 [从环境到部署教学视频](https://www.bilibili.com/video/BV1Rg411u7xH)
 
 [开发教学](https://www.gin-vue-admin.com/guide/start-quickly/env.html) (贡献者:  <a href="https://github.com/LLemonGreen">LLemonGreen</a> And <a href="https://github.com/fkk0509">Fann</a>)
@@ -65,11 +64,7 @@
 
 3.您完全可以通过我们的教程和文档完成一切操作，因此我们不再提供免费的技术服务，如需服务请进行[付费支持](https://www.gin-vue-admin.com/coffee/payment.html)
 
-4.如果您将此项目用于商业用途，请遵守Apache2.0协议并保留作者技术支持声明。您需保留如下版权声明信息，以及日志和代码中所包含的版权声明信息。所需保留信息均为文案性质，不会影响任何业务内容，如决定商用【产生收益的商业行为均在商用行列】或者必须剔除请[购买授权](https://plugin.gin-vue-admin.com/license)
-\
-<img src="https://qmplusimg.henrongyi.top/openSource/login.jpg" width="1000">
-
-<img src="https://qmplusimg.henrongyi.top/openSource/dashboard.jpg" width="1000">
+<br />
 
 ## 1. 基本介绍
 
@@ -77,13 +72,14 @@
 
 > Gin-vue-admin是一个基于 [vue](https://vuejs.org) 和 [gin](https://gin-gonic.com) 开发的全栈前后端分离的开发基础平台，集成jwt鉴权，动态路由，动态菜单，casbin鉴权，表单生成器，代码生成器等功能，提供多种示例文件，让您把更多时间专注在业务开发上。
 
-[在线预览](http://demo.gin-vue-admin.com): http://demo.gin-vue-admin.com
+[在线预览](http://demo.gin-vue-admin.com): <http://demo.gin-vue-admin.com>
 
 测试用户名：admin
 
 测试密码：123456
 
 ### 1.2 贡献指南
+
 Hi! 首先感谢你使用 gin-vue-admin。
 
 Gin-vue-admin 是一套为快速研发准备的一整套前后端分离架构式的开源框架，旨在快速搭建中小型项目。
@@ -91,17 +87,15 @@ Gin-vue-admin 是一套为快速研发准备的一整套前后端分离架构式
 Gin-vue-admin 的成长离不开大家的支持，如果你愿意为 gin-vue-admin 贡献代码或提供建议，请阅读以下内容。
 
 #### 1.2.1 Issue 规范
+
 - issue 仅用于提交 Bug 或 Feature 以及设计相关的内容，其它内容可能会被直接关闭。
-									      
 - 在提交 issue 之前，请搜索相关内容是否已被提出。
 
 #### 1.2.2 Pull Request 规范
+
 - 请先 fork 一份到自己的项目下，不要直接在仓库下建分支。
-
 - commit 信息要以`[文件名]: 描述信息` 的形式填写，例如 `README.md: fix xxx bug`。
-
 - 如果是修复 bug，请在 PR 中给出描述信息。
-
 - 合并代码需要两名维护人员参与：一人进行 review 后 approve，另一人再次 review，通过后即可合并。
 
 ## 2. 使用说明
@@ -148,18 +142,18 @@ npm run serve
 
 #### 2.3.1 安装 swagger
 
-``` shell
+```shell
 go install github.com/swaggo/swag/cmd/swag@latest
 ```
 
 #### 2.3.2 生成API文档
 
-```` shell
+```shell
 cd server
 swag init
-````
+```
 
-> 执行上面的命令后，server目录下会出现docs文件夹里的 `docs.go`, `swagger.json`, `swagger.yaml` 三个文件更新，启动go服务之后, 在浏览器输入 [http://localhost:8888/swagger/index.html](http://localhost:8888/swagger/index.html) 即可查看swagger文档
+> 执行上面的命令后，server目录下会出现docs文件夹里的 `docs.go`, `swagger.json`, `swagger.yaml` 三个文件更新，启动go服务之后, 在浏览器输入 <http://localhost:8888/swagger/index.html> 即可查看swagger文档
 
 ### 2.4 VSCode工作区
 
@@ -313,42 +307,42 @@ swag init
 - 配置管理：配置文件可前台修改(在线体验站点不开放此功能)。
 - 条件搜索：增加条件搜索示例。
 - restful示例：可以参考用户管理模块中的示例API。
-	- 前端文件参考: [web/src/view/superAdmin/api/api.vue](https://github.com/flipped-aurora/gin-vue-admin/blob/master/web/src/view/superAdmin/api/api.vue)
-    - 后台文件参考: [server/router/sys_api.go](https://github.com/flipped-aurora/gin-vue-admin/blob/master/server/router/sys_api.go)
+  - 前端文件参考: [web/src/view/superAdmin/api/api.vue](https://github.com/flipped-aurora/gin-vue-admin/blob/master/web/src/view/superAdmin/api/api.vue)
+  - 后台文件参考: [server/router/sys\_api.go](https://github.com/flipped-aurora/gin-vue-admin/blob/master/server/router/sys_api.go)
 - 多点登录限制：需要在`config.yaml`中把`system`中的`use-multipoint`修改为true(需要自行配置Redis和Config中的Redis参数，测试阶段，有bug请及时反馈)。
 - 分片上传：提供文件分片上传和大文件分片上传功能示例。
 - 表单生成器：表单生成器借助 [@Variant Form](https://github.com/vform666/variant-form) 。
 - 代码生成器：后台基础逻辑以及简单curd的代码生成器。
 
-## 6. 知识库 
+## 6. 知识库
 
 ## 6.1 团队博客
 
-> https://www.yuque.com/flipped-aurora
+> <https://www.yuque.com/flipped-aurora>
 >
->内有前端框架教学视频。如果觉得项目对您有所帮助可以添加我的个人微信:shouzi_1994，欢迎您提出宝贵的需求。
+> 内有前端框架教学视频。如果觉得项目对您有所帮助可以添加我的个人微信:shouzi\_1994，欢迎您提出宝贵的需求。
 
 ## 6.2 教学视频
 
 （1）手把手教学视频
 
-> https://www.bilibili.com/video/BV1Rg411u7xH/
+> <https://www.bilibili.com/video/BV1Rg411u7xH/>
 
 （2）后端目录结构调整介绍以及使用方法
 
-> https://www.bilibili.com/video/BV1x44y117TT/
+> <https://www.bilibili.com/video/BV1x44y117TT/>
 
 （3）golang基础教学视频
 
-> bilibili：https://space.bilibili.com/322210472/channel/detail?cid=108884
+> bilibili：<https://space.bilibili.com/322210472/channel/detail?cid=108884>
 
 （4）gin框架基础教学
 
-> bilibili：https://space.bilibili.com/322210472/channel/detail?cid=126418&ctype=0
+> bilibili：<https://space.bilibili.com/322210472/channel/detail?cid=126418&ctype=0>
 
 （5）gin-vue-admin 版本更新介绍视频
 
-> bilibili：https://www.bilibili.com/video/BV1kv4y1g7nT
+> bilibili：<https://www.bilibili.com/video/BV1kv4y1g7nT>
 
 ## 7. 联系方式
 
@@ -357,9 +351,10 @@ swag init
 ### QQ交流群：971857775
 
 ### 微信交流群
-| 微信 |
-|  :---:  | 
-| <img width="150" src="http://qmplusimg.henrongyi.top/qrjjz.png"> 
+
+|                                微信                                |
+| :--------------------------------------------------------------: |
+| <img width="150" src="http://qmplusimg.henrongyi.top/qrjjz.png"> |
 
 防止广告进群，添加微信，输入以下代码执行结果（请勿转码为string）
 
@@ -381,9 +376,5 @@ fmt.Println(decodeBytes, err)
 
 ## 9. 捐赠
 
-如果你觉得这个项目对你有帮助，你可以请作者喝饮料 :tropical_drink: [点我](https://www.gin-vue-admin.com/coffee/index.html)
+如果你觉得这个项目对你有帮助，你可以请作者喝饮料 :tropical\_drink: [点我](https://www.gin-vue-admin.com/coffee/index.html)
 
-## 10. 注意事项
-
-请严格遵守Apache 2.0协议并保留作品声明，去除版权信息请务必[获取授权](https://plugin.gin-vue-admin.com/license)  
-未授权去除版权信息将依法追究法律责任

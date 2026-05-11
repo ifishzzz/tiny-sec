@@ -6,4 +6,4 @@
 
 ## Done
 
-- 暂无
+- [去掉前端水印](aiDoc/memory/business/done/remove-frontend-watermark.md)
