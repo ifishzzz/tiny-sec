@@ -15,7 +15,7 @@
   "/src/view/error/reload.vue": "Reload",
   "/src/view/example/breakpoint/breakpoint.vue": "BreakPoint",
   "/src/view/example/customer/customer.vue": "Customer",
-  "/src/view/fofa/index.vue": "FofaSearch",
+  "/src/view/fofa/index.vue": "SpaceSearch",
   "/src/view/example/index.vue": "Example",
   "/src/view/example/upload/scanUpload.vue": "scanUpload",
   "/src/view/example/upload/upload.vue": "Upload",

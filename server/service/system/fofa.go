@@ -18,9 +18,14 @@ import (
 )
 
 const (
-	fofaAPIEndpoint = "https://fofa.info/api/v1/search/all"
-	fofaEmailKey    = "fofa_email"
-	fofaAPIKeyKey   = "fofa_key"
+	searchEngineFofa  = "fofa"
+	searchEngineQuake = "quake"
+
+	fofaAPIEndpoint  = "https://fofa.info/api/v1/search/all"
+	fofaEmailKey     = "fofa_email"
+	fofaAPIKeyKey    = "fofa_key"
+	quakeAPIEndpoint = "https://quake.360.net/api/v3/search/quake_service"
+	quakeAPIKeyKey   = "quake_key"
 )
 
 var fofaFields = []string{"host", "ip", "port", "protocol", "title", "domain", "server", "country", "city"}
@@ -38,26 +43,73 @@ type fofaAPIResponse struct {
 	Results [][]any `json:"results"`
 }
 
-func (fofaService *FofaService) Search(info systemReq.FofaSearch) (result systemRes.FofaSearchResult, err error) {
+type quakeAPIResponse struct {
+	Code    quakeCode       `json:"code"`
+	Message string          `json:"message"`
+	Meta    quakeMeta       `json:"meta"`
+	Data    json.RawMessage `json:"data"`
+}
+
+type quakeCode string
+
+func (c *quakeCode) UnmarshalJSON(data []byte) error {
+	text := strings.TrimSpace(string(data))
+	if text == "" || text == "null" {
+		*c = ""
+		return nil
+	}
+
+	if len(text) >= 2 && text[0] == '"' && text[len(text)-1] == '"' {
+		text = text[1 : len(text)-1]
+	}
+
+	*c = quakeCode(text)
+	return nil
+}
+
+type quakeMeta struct {
+	Pagination struct {
+		Total int64 `json:"total"`
+	} `json:"pagination"`
+}
+
+type quakeRecord struct {
+	IP       string `json:"ip"`
+	Port     int    `json:"port"`
+	Location struct {
+		CountryCN string `json:"country_cn"`
+		Country   string `json:"country"`
+		CityCN    string `json:"city_cn"`
+		City      string `json:"city"`
+	} `json:"location"`
+	Service struct {
+		Name    string `json:"name"`
+		Product string `json:"product"`
+		HTTP    struct {
+			Host  string `json:"host"`
+			Title string `json:"title"`
+		} `json:"http"`
+	} `json:"service"`
+}
+
+func (fofaService *FofaService) Search(info systemReq.FofaSearch) (systemRes.FofaSearchResult, error) {
+	switch normalizeSearchEngine(info.Engine) {
+	case searchEngineQuake:
+		return fofaService.searchQuake(info)
+	default:
+		return fofaService.searchFofa(info)
+	}
+}
+
+func (fofaService *FofaService) searchFofa(info systemReq.FofaSearch) (result systemRes.FofaSearchResult, err error) {
 	query := strings.TrimSpace(info.Query)
 	if query == "" {
-		return result, fmt.Errorf("请输入 FOFA 查询语法")
+		return result, fmt.Errorf("请输入查询语法")
 	}
 
-	page := info.Page
-	if page <= 0 {
-		page = 1
-	}
+	page, pageSize := normalizePagination(info.Page, info.PageSize, 10000)
 
-	pageSize := info.PageSize
-	if pageSize <= 0 {
-		pageSize = 10
-	}
-	if pageSize > 10000 {
-		pageSize = 10000
-	}
-
-	email, key, err := fofaService.getCredentials()
+	email, key, err := fofaService.getFofaCredentials()
 	if err != nil {
 		return result, err
 	}
@@ -120,13 +172,105 @@ func (fofaService *FofaService) Search(info systemReq.FofaSearch) (result system
 		Total:    apiResp.Size,
 		Page:     page,
 		PageSize: pageSize,
+		Engine:   searchEngineFofa,
 		Query:    apiResp.Query,
 		Mode:     apiResp.Mode,
+	}
+	if result.Query == "" {
+		result.Query = query
 	}
 	return result, nil
 }
 
-func (fofaService *FofaService) getCredentials() (email string, key string, err error) {
+func (fofaService *FofaService) searchQuake(info systemReq.FofaSearch) (result systemRes.FofaSearchResult, err error) {
+	query := strings.TrimSpace(info.Query)
+	if query == "" {
+		return result, fmt.Errorf("请输入查询语法")
+	}
+
+	page, pageSize := normalizePagination(info.Page, info.PageSize, 100)
+	start := (page - 1) * pageSize
+
+	key, err := fofaService.getQuakeKey()
+	if err != nil {
+		return result, err
+	}
+
+	requestBody := map[string]any{
+		"query":  query,
+		"start":  start,
+		"size":   pageSize,
+		"latest": !info.Full,
+	}
+
+	resp, err := gvaRequest.HttpRequestWithTimeout(
+		quakeAPIEndpoint,
+		http.MethodPost,
+		map[string]string{
+			"Accept":       "application/json",
+			"X-QuakeToken": key,
+		},
+		nil,
+		requestBody,
+		30*time.Second,
+	)
+	if err != nil {
+		return result, fmt.Errorf("Quake 请求失败: %w", err)
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return result, fmt.Errorf("读取 Quake 响应失败: %w", err)
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return result, fmt.Errorf("Quake 请求失败，状态码 %d: %s", resp.StatusCode, strings.TrimSpace(string(body)))
+	}
+
+	var apiResp quakeAPIResponse
+	if err = json.Unmarshal(body, &apiResp); err != nil {
+		return result, fmt.Errorf("解析 Quake 响应失败: %w", err)
+	}
+
+	if !apiResp.Code.IsSuccess() {
+		errMsg := strings.TrimSpace(apiResp.Message)
+		if errMsg == "" {
+			errMsg = "Quake 返回错误(" + apiResp.Code.String() + ")"
+		}
+		return result, fmt.Errorf("%s", errMsg)
+	}
+
+	var records []quakeRecord
+	if len(apiResp.Data) > 0 && string(apiResp.Data) != "null" {
+		if err = json.Unmarshal(apiResp.Data, &records); err != nil {
+			return result, fmt.Errorf("解析 Quake 数据失败: %w", err)
+		}
+	}
+
+	items := make([]systemRes.FofaResultItem, 0, len(records))
+	for _, row := range records {
+		items = append(items, mapQuakeResultItem(row))
+	}
+
+	mode := "latest"
+	if info.Full {
+		mode = "full"
+	}
+
+	result = systemRes.FofaSearchResult{
+		List:     items,
+		Total:    apiResp.Meta.Pagination.Total,
+		Page:     page,
+		PageSize: pageSize,
+		Engine:   searchEngineQuake,
+		Query:    query,
+		Mode:     mode,
+	}
+	return result, nil
+}
+
+func (fofaService *FofaService) getFofaCredentials() (email string, key string, err error) {
 	var emailParam system.SysParams
 	if err = global.GVA_DB.Where("`key` = ?", fofaEmailKey).First(&emailParam).Error; err != nil {
 		return "", "", fmt.Errorf("请先在参数管理中配置 %s", fofaEmailKey)
@@ -144,6 +288,50 @@ func (fofaService *FofaService) getCredentials() (email string, key string, err 
 	}
 
 	return email, key, nil
+}
+
+func (fofaService *FofaService) getQuakeKey() (string, error) {
+	var keyParam system.SysParams
+	if err := global.GVA_DB.Where("`key` = ?", quakeAPIKeyKey).First(&keyParam).Error; err != nil {
+		return "", fmt.Errorf("请先在参数管理中配置 %s", quakeAPIKeyKey)
+	}
+
+	key := strings.TrimSpace(keyParam.Value)
+	if key == "" {
+		return "", fmt.Errorf("请先在参数管理中填写 %s 的值", quakeAPIKeyKey)
+	}
+	return key, nil
+}
+
+func (c quakeCode) IsSuccess() bool {
+	code := strings.TrimSpace(string(c))
+	return code == "" || code == "0"
+}
+
+func (c quakeCode) String() string {
+	return strings.TrimSpace(string(c))
+}
+
+func normalizeSearchEngine(engine string) string {
+	switch strings.ToLower(strings.TrimSpace(engine)) {
+	case searchEngineQuake:
+		return searchEngineQuake
+	default:
+		return searchEngineFofa
+	}
+}
+
+func normalizePagination(page int, pageSize int, maxPageSize int) (int, int) {
+	if page <= 0 {
+		page = 1
+	}
+	if pageSize <= 0 {
+		pageSize = 10
+	}
+	if maxPageSize > 0 && pageSize > maxPageSize {
+		pageSize = maxPageSize
+	}
+	return page, pageSize
 }
 
 func mapFofaResultItem(row []any) systemRes.FofaResultItem {
@@ -176,6 +364,39 @@ func mapFofaResultItem(row []any) systemRes.FofaResultItem {
 		}
 	}
 	return item
+}
+
+func mapQuakeResultItem(row quakeRecord) systemRes.FofaResultItem {
+	host := strings.TrimSpace(row.Service.HTTP.Host)
+	protocol := "http"
+	switch {
+	case strings.HasPrefix(host, "https://"):
+		protocol = "https"
+	case strings.HasPrefix(host, "http://"):
+		protocol = "http"
+	case row.Port == 443:
+		protocol = "https"
+	}
+
+	return systemRes.FofaResultItem{
+		Host:     host,
+		IP:       strings.TrimSpace(row.IP),
+		Port:     row.Port,
+		Protocol: protocol,
+		Title:    strings.TrimSpace(row.Service.HTTP.Title),
+		Server:   firstNonEmptyString(strings.TrimSpace(row.Service.Product), strings.TrimSpace(row.Service.Name)),
+		Country:  firstNonEmptyString(strings.TrimSpace(row.Location.CountryCN), strings.TrimSpace(row.Location.Country)),
+		City:     firstNonEmptyString(strings.TrimSpace(row.Location.CityCN), strings.TrimSpace(row.Location.City)),
+	}
+}
+
+func firstNonEmptyString(values ...string) string {
+	for _, value := range values {
+		if value != "" {
+			return value
+		}
+	}
+	return ""
 }
 
 func valueToString(value any) string {

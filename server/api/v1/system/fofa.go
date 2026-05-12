@@ -12,12 +12,12 @@ import (
 
 type FofaApi struct{}
 
-// Search Fofa 搜索
-// @Tags Fofa
-// @Summary FOFA 资产搜索
+// Search 网络空间搜索
+// @Tags SpaceSearch
+// @Summary 网络空间搜索
 // @Security ApiKeyAuth
 // @Produce application/json
-// @Param query query systemReq.FofaSearch true "FOFA 查询参数"
+// @Param query query systemReq.FofaSearch true "网络空间搜索参数"
 // @Success 200 {object} commonRes.Response{data=systemRes.FofaSearchResult,msg=string} "搜索成功"
 // @Router /fofa/search [get]
 func (fofaApi *FofaApi) Search(c *gin.Context) {
@@ -28,14 +28,14 @@ func (fofaApi *FofaApi) Search(c *gin.Context) {
 	}
 
 	if strings.TrimSpace(searchInfo.Query) == "" {
-		commonRes.FailWithMessage("请输入 FOFA 查询语法", c)
+		commonRes.FailWithMessage("请输入查询语法", c)
 		return
 	}
 
 	result, err := fofaService.Search(searchInfo)
 	if err != nil {
-		global.GVA_LOG.Error("FOFA 搜索失败", zap.Error(err))
-		commonRes.FailWithMessage("FOFA 搜索失败: "+err.Error(), c)
+		global.GVA_LOG.Error("网络空间搜索失败", zap.Error(err))
+		commonRes.FailWithMessage("网络空间搜索失败: "+err.Error(), c)
 		return
 	}
 

@@ -17,6 +17,7 @@ type FofaSearchResult struct {
 	Total    int64            `json:"total"`
 	Page     int              `json:"page"`
 	PageSize int              `json:"pageSize"`
+	Engine   string           `json:"engine"`
 	Query    string           `json:"query"`
 	Mode     string           `json:"mode"`
 }
