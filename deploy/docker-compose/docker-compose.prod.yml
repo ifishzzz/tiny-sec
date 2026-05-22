@@ -1,0 +1,45 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: gva-mysql
+    restart: always
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-change_me}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-gva}
+      MYSQL_USER: ${MYSQL_USER:-gva}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-change_me}
+    volumes:
+      - ./data/mysql:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-p${MYSQL_ROOT_PASSWORD:-change_me}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  server:
+    image: ${SERVER_IMAGE:-ghcr.io/your-org/gin-vue-admin-server:latest}
+    container_name: gva-server
+    restart: always
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      TZ: ${TZ:-Asia/Shanghai}
+    volumes:
+      - ${SERVER_CONFIG_FILE:-./config/server-config.yaml.example}:/etc/gva/config.yaml:ro
+      - ./data/uploads:/opt/gva/server/uploads/file
+      - ./data/log:/opt/gva/server/log
+    expose:
+      - "8888"
+
+  web:
+    image: ${WEB_IMAGE:-ghcr.io/your-org/gin-vue-admin-web:latest}
+    container_name: gva-web
+    restart: always
+    depends_on:
+      - server
+    ports:
+      - "${WEB_PORT:-80}:80"

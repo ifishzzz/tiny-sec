@@ -1,0 +1,239 @@
+jwt:
+    signing-key: change_me_signing_key
+    expires-time: 7d
+    buffer-time: 1d
+    issuer: qmPlus
+
+zap:
+    level: info
+    format: console
+    prefix: "[github.com/flipped-aurora/gin-vue-admin/server]"
+    director: log
+    show-line: true
+    encode-level: LowercaseLevelEncoder
+    stacktrace-key: stacktrace
+    log-in-console: true
+    retention-day: -1
+
+redis:
+    addr: 127.0.0.1:6379
+    password: ""
+    db: 0
+    useCluster: false
+    clusterAddrs: []
+
+redis-list:
+    - name: cache
+      addr: 127.0.0.1:6379
+      password: ""
+      db: 0
+      useCluster: false
+      clusterAddrs: []
+
+mongo:
+    coll: ""
+    options: ""
+    database: ""
+    username: ""
+    password: ""
+    auth-source: ""
+    min-pool-size: 0
+    max-pool-size: 100
+    socket-timeout-ms: 0
+    connect-timeout-ms: 0
+    is-zap: false
+    hosts:
+        - host: ""
+          port: ""
+
+email:
+    to: ""
+    port: 465
+    from: ""
+    host: ""
+    is-ssl: true
+    secret: ""
+    nickname: ""
+
+system:
+    env: release
+    addr: 8888
+    db-type: mysql
+    oss-type: local
+    use-redis: false
+    use-mongo: false
+    use-multipoint: false
+    iplimit-count: 15000
+    iplimit-time: 3600
+    router-prefix: ""
+    use-strict-auth: false
+    disable-auto-migrate: false
+
+captcha:
+    key-long: 6
+    img-width: 240
+    img-height: 80
+    open-captcha: 0
+    open-captcha-timeout: 3600
+
+mysql:
+    path: mysql
+    port: "3306"
+    config: charset=utf8mb4&parseTime=True&loc=Local
+    db-name: gva
+    username: gva
+    password: change_me_app
+    max-idle-conns: 10
+    max-open-conns: 100
+    log-mode: error
+    log-zap: false
+
+pgsql:
+    path: ""
+    port: ""
+    config: ""
+    db-name: ""
+    username: ""
+    password: ""
+    max-idle-conns: 10
+    max-open-conns: 100
+    log-mode: ""
+    log-zap: false
+
+oracle:
+    path: ""
+    port: ""
+    config: ""
+    db-name: ""
+    username: ""
+    password: ""
+    max-idle-conns: 10
+    max-open-conns: 100
+    log-mode: ""
+    log-zap: false
+
+mssql:
+    path: ""
+    port: ""
+    config: ""
+    db-name: ""
+    username: ""
+    password: ""
+    max-idle-conns: 10
+    max-open-conns: 100
+    log-mode: ""
+    log-zap: false
+
+sqlite:
+    path: ""
+    port: ""
+    config: ""
+    db-name: ""
+    username: ""
+    password: ""
+    max-idle-conns: 10
+    max-open-conns: 100
+    log-mode: ""
+    log-zap: false
+
+db-list:
+    - disable: true
+      type: ""
+      alias-name: ""
+      path: ""
+      port: ""
+      config: ""
+      db-name: ""
+      username: ""
+      password: ""
+      max-idle-conns: 10
+      max-open-conns: 100
+      log-mode: ""
+      log-zap: false
+
+local:
+    path: uploads/file
+    store-path: uploads/file
+
+autocode:
+    web: web/src
+    root: ""
+    server: server
+    module: github.com/flipped-aurora/gin-vue-admin/server
+    ai-path: ""
+
+qiniu:
+    zone: ZoneHuaDong
+    bucket: ""
+    img-path: ""
+    use-https: false
+    access-key: ""
+    secret-key: ""
+    use-cdn-domains: false
+
+minio:
+    endpoint: ""
+    access-key-id: ""
+    access-key-secret: ""
+    bucket-name: ""
+    use-ssl: false
+    base-path: ""
+    bucket-url: ""
+
+aliyun-oss:
+    endpoint: ""
+    access-key-id: ""
+    access-key-secret: ""
+    bucket-name: ""
+    bucket-url: ""
+    base-path: ""
+
+tencent-cos:
+    bucket: ""
+    region: ""
+    secret-id: ""
+    secret-key: ""
+    base-url: ""
+    path-prefix: github.com/flipped-aurora/gin-vue-admin/server
+
+aws-s3:
+    bucket: ""
+    region: ""
+    endpoint: ""
+    s3-force-path-style: false
+    disable-ssl: false
+    secret-id: ""
+    secret-key: ""
+    base-url: ""
+    path-prefix: github.com/flipped-aurora/gin-vue-admin/server
+
+cloudflare-r2:
+    bucket: ""
+    base-url: ""
+    path: uploads
+    account-id: ""
+    access-key-id: ""
+    secret-access-key: ""
+
+hua-wei-obs:
+    path: ""
+    bucket: ""
+    endpoint: ""
+    access-key: ""
+    secret-key: ""
+
+excel:
+    dir: ./resource/excel/
+
+disk-list:
+    - mount-point: "/"
+
+cors:
+    mode: allow-all
+    whitelist: []
+
+mcp:
+    name: GVA_MCP
+    version: v1.0.0
+    addr: 8889
+    separate: false
