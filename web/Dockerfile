@@ -1,12 +1,9 @@
 FROM node:22-slim AS base
-ENV PNPM_HOME="/pnpm"
-ENV PATH="$PNPM_HOME:$PATH"
-RUN corepack enable && corepack prepare pnpm@latest --activate
 COPY . /app
 WORKDIR /app
 
 FROM base AS build
-RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --config.onlyBuiltDependencies="[]" && pnpm run build
+RUN npm install && npm run build
 
 FROM nginx:alpine
 LABEL MAINTAINER="bypanghu@163.com"
