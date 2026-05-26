@@ -6,7 +6,7 @@ COPY . /app
 WORKDIR /app
 
 FROM base AS build
-RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install && pnpm run build
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --config.onlyBuiltDependencies="[]" && pnpm run build
 
 FROM nginx:alpine
 LABEL MAINTAINER="bypanghu@163.com"
