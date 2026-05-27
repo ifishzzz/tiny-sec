@@ -289,7 +289,9 @@ parse_args() {
     shift
   done
 
-  [[ "${USE_PULL}" -eq 1 && -n "${GIT_REF}" ]] && die "--pull 和 --ref 不能同时使用"
+  if [[ "${USE_PULL}" -eq 1 && -n "${GIT_REF}" ]]; then
+    die "--pull 和 --ref 不能同时使用"
+  fi
 }
 
 main() {
