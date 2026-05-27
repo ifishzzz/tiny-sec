@@ -37,6 +37,8 @@ services:
     restart: always
     ports:
       - '8888:8888'
+    volumes:
+      - ../../deploy/falco-agent:/go/src/github.com/flipped-aurora/gin-vue-admin/deploy/falco-agent:ro
     depends_on:
       mysql:
         condition: service_healthy
