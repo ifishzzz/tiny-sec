@@ -15,6 +15,7 @@ let timer = null
 let forceCloseTimer = null
 let loadingInstance = null
 let isLoadingVisible = false
+let isHandlingUnauthorized = false
 
 const clearLoadingTimers = () => {
   if (timer) {
@@ -116,6 +117,30 @@ const resetLoading = () => {
   closeLoadingInstance()
 }
 
+const handleUnauthorized = async (message) => {
+  if (isHandlingUnauthorized) {
+    return
+  }
+
+  isHandlingUnauthorized = true
+  resetLoading()
+
+  const userStore = useUserStore()
+  await userStore.ClearStorage()
+
+  ElMessage({
+    showClose: true,
+    message: message || '登录状态已失效，请重新登录',
+    type: 'error'
+  })
+
+  if (router.currentRoute.value?.name !== 'Login') {
+    await router.replace({ name: 'Login', replace: true })
+  }
+
+  isHandlingUnauthorized = false
+}
+
 service.interceptors.request.use(
   (config) => {
     if (typeof config.timeout === 'undefined') {
@@ -202,15 +227,7 @@ service.interceptors.response.use(
     }
 
     if (error.response.status === 401) {
-      emitter.emit('show-error', {
-        code: '401',
-        message: getErrorMessage(error),
-        fn: () => {
-          const userStore = useUserStore()
-          userStore.ClearStorage()
-          router.push({ name: 'Login', replace: true })
-        }
-      })
+      void handleUnauthorized(getErrorMessage(error))
       return Promise.reject(error)
     }
 
