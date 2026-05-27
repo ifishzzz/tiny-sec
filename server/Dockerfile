@@ -1,14 +1,16 @@
-FROM golang:alpine as builder
+FROM golang:1.24-alpine as builder
 
 WORKDIR /go/src/github.com/flipped-aurora/gin-vue-admin/server
-COPY . .
 
-RUN go env -w GO111MODULE=on \
-    && go env -w GOPROXY=https://goproxy.cn,direct \
-    && go env -w CGO_ENABLED=0 \
-    && go env \
-    && go mod tidy \
-    && go build -o server .
+ENV GO111MODULE=on \
+    GOPROXY=https://goproxy.cn,direct \
+    CGO_ENABLED=0
+
+COPY go.mod go.sum ./
+RUN go mod download
+
+COPY . .
+RUN go build -o server .
 
 FROM alpine:latest
 
