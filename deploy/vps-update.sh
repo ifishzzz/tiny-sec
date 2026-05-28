@@ -5,12 +5,23 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 COMPOSE_DIR="${REPO_ROOT}/deploy/docker-compose"
 COMPOSE_FILE="${COMPOSE_DIR}/docker-compose.yaml"
+SERVER_CONFIG_FILE="${COMPOSE_DIR}/config/server-config.yaml"
+SERVER_CONFIG_EXAMPLE="${COMPOSE_DIR}/config/server-config.yaml.example"
 
 SERVER_HEALTH_URL="${SERVER_HEALTH_URL:-http://127.0.0.1:8888/health}"
 WEB_HEALTH_URL="${WEB_HEALTH_URL:-http://127.0.0.1:8080/}"
 WAIT_RETRIES="${WAIT_RETRIES:-30}"
 WAIT_INTERVAL="${WAIT_INTERVAL:-2}"
 LOG_TAIL="${LOG_TAIL:-80}"
+
+MYSQL_HOST_DEFAULT="${MYSQL_HOST_DEFAULT:-177.7.0.13}"
+MYSQL_PORT_DEFAULT="${MYSQL_PORT_DEFAULT:-3306}"
+MYSQL_DB_DEFAULT="${MYSQL_DB_DEFAULT:-qmPlus}"
+MYSQL_USER_DEFAULT="${MYSQL_USER_DEFAULT:-gva}"
+MYSQL_PASSWORD_DEFAULT="${MYSQL_PASSWORD_DEFAULT:-Gva@2026Secure!}"
+REDIS_ADDR_DEFAULT="${REDIS_ADDR_DEFAULT:-177.7.0.14:6379}"
+JWT_SIGNING_KEY_DEFAULT="${JWT_SIGNING_KEY_DEFAULT:-qmPlus}"
+OPEN_CAPTCHA_DEFAULT="${OPEN_CAPTCHA_DEFAULT:-999999}"
 
 TARGET="all"
 BRANCH="main"
@@ -74,6 +85,65 @@ run_compose() {
     cd "${COMPOSE_DIR}"
     docker compose -f "${COMPOSE_FILE}" "$@"
   )
+}
+
+extract_mysql_block() {
+  sed -n '/^mysql:$/,/^[^[:space:]]/p' "$1"
+}
+
+config_has_runtime_values() {
+  local file="$1"
+  local mysql_block
+
+  [[ -f "${file}" ]] || return 1
+  mysql_block="$(extract_mysql_block "${file}")"
+  [[ -n "${mysql_block}" ]] || return 1
+
+  grep -Eq '^    path: .+' <<<"${mysql_block}" &&
+    ! grep -Eq '^    path: ""$' <<<"${mysql_block}" &&
+    grep -Eq '^    db-name: .+' <<<"${mysql_block}" &&
+    ! grep -Eq '^    db-name: ""$' <<<"${mysql_block}" &&
+    grep -Eq '^    username: .+' <<<"${mysql_block}" &&
+    ! grep -Eq '^    username: ""$' <<<"${mysql_block}" &&
+    grep -Eq '^    password: .+' <<<"${mysql_block}" &&
+    ! grep -Eq '^    password: ""$' <<<"${mysql_block}" &&
+    ! grep -Eq '^    password: change_me_app$' <<<"${mysql_block}"
+}
+
+generate_server_config_from_example() {
+  [[ -f "${SERVER_CONFIG_EXAMPLE}" ]] || die "未找到运行时配置模板: ${SERVER_CONFIG_EXAMPLE}"
+
+  cp "${SERVER_CONFIG_EXAMPLE}" "${SERVER_CONFIG_FILE}"
+  sed -i.bak \
+    -e "s#change_me_signing_key#${JWT_SIGNING_KEY_DEFAULT}#g" \
+    -e "s#127.0.0.1:6379#${REDIS_ADDR_DEFAULT}#g" \
+    -e "s#open-captcha: 0#open-captcha: ${OPEN_CAPTCHA_DEFAULT}#g" \
+    -e "s#path: mysql#path: ${MYSQL_HOST_DEFAULT}#g" \
+    -e "s#db-name: gva#db-name: ${MYSQL_DB_DEFAULT}#g" \
+    -e "s#password: change_me_app#password: ${MYSQL_PASSWORD_DEFAULT}#g" \
+    "${SERVER_CONFIG_FILE}"
+  rm -f "${SERVER_CONFIG_FILE}.bak"
+}
+
+ensure_server_runtime_config() {
+  [[ "${TARGET}" == "web" ]] && return 0
+
+  mkdir -p "$(dirname "${SERVER_CONFIG_FILE}")"
+
+  if [[ -f "${SERVER_CONFIG_FILE}" ]]; then
+    info "使用运行时配置: ${SERVER_CONFIG_FILE}"
+  elif config_has_runtime_values "${REPO_ROOT}/server/config.docker.yaml"; then
+    warn "检测到 server/config.docker.yaml 包含运行时配置，首次复制到 ${SERVER_CONFIG_FILE}"
+    cp "${REPO_ROOT}/server/config.docker.yaml" "${SERVER_CONFIG_FILE}"
+  else
+    warn "未找到运行时配置，基于模板生成 ${SERVER_CONFIG_FILE}"
+    generate_server_config_from_example
+  fi
+
+  chmod 600 "${SERVER_CONFIG_FILE}" || true
+
+  config_has_runtime_values "${SERVER_CONFIG_FILE}" ||
+    die "运行时配置缺少 MySQL 连接信息，请检查 ${SERVER_CONFIG_FILE}"
 }
 
 git_has_tracked_changes() {
@@ -308,6 +378,7 @@ main() {
   info "更新目标: ${TARGET}"
 
   update_code_if_needed
+  ensure_server_runtime_config
   build_services
   start_services
   healthcheck

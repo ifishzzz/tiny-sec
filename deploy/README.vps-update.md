@@ -26,6 +26,17 @@ cd /opt/tiny-sec
 sudo chmod +x deploy/vps-update.sh
 ```
 
+首次执行 `server` 或 `all` 更新时，脚本会确保存在运行时配置文件：
+
+```text
+deploy/docker-compose/config/server-config.yaml
+```
+
+- 若服务器当前 `server/config.docker.yaml` 已包含可用的 MySQL 连接信息，脚本会自动复制一份到上述路径
+- 若没有现成配置，脚本会基于 `deploy/docker-compose/config/server-config.yaml.example` 自动生成一份可用模板
+- 之后 `gva-server` 会始终挂载这份宿主机配置，重建容器不会再把数据库连接信息打回镜像默认值
+- 日常应备份和维护这份文件，而不是继续修改仓库跟踪的 `server/config.docker.yaml`
+
 ## 常用用法
 
 更新全部容器，并先快进拉取 `main`：
@@ -69,6 +80,7 @@ sudo bash deploy/vps-update.sh server --no-cache
 - `--pull` 仅做 `fetch + merge --ff-only`，不会强制覆盖本地改动
 - 若检测到已跟踪文件存在改动，脚本默认会中止，避免误覆盖本地定制
 - `server` 更新会自动确保 `mysql`、`redis` 已启动并健康
+- `server` / `all` 更新前会自动校验运行时配置文件是否存在且包含 MySQL 连接信息
 - `server` 健康检查走 `GET /health`
 - `web` 健康检查走 `GET /`
 

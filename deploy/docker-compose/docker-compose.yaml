@@ -38,6 +38,7 @@ services:
     ports:
       - '8888:8888'
     volumes:
+      - ./config/server-config.yaml:/go/src/github.com/flipped-aurora/gin-vue-admin/server/config.docker.yaml:ro
       - ../../deploy/falco-agent:/go/src/github.com/flipped-aurora/gin-vue-admin/deploy/falco-agent:ro
     depends_on:
       mysql:
@@ -59,12 +60,12 @@ services:
     ports:
       - "13306:3306"  # host物理直接映射端口为13306
     environment:
-      #MYSQL_ROOT_PASSWORD: 'Aa@6447985' # root管理员用户密码
+      MYSQL_ROOT_PASSWORD: 'Gva@2026Secure!' # root管理员用户密码
       MYSQL_DATABASE: 'qmPlus' # 初始化启动时要创建的数据库的名称
       MYSQL_USER: 'gva'
-      MYSQL_PASSWORD: 'Aa@6447985'
+      MYSQL_PASSWORD: 'Gva@2026Secure!'
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "gva", "-pAa@6447985"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "gva", "-pGva@2026Secure!"]
       interval: 10s
       timeout: 5s
       retries: 3

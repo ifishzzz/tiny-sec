@@ -25,3 +25,5 @@
 - 脚本默认不修改数据库初始化状态，只负责更新容器
 - `server` 更新时自动确保 `mysql`、`redis` 已启动
 - 健康检查优先使用后端 `/health` 和前端 `/`
+- `gva-server` 运行时配置不再依赖镜像内默认 `server/config.docker.yaml`
+- 服务器实际运行配置应落在 `deploy/docker-compose/config/server-config.yaml`，并通过 compose 挂载进容器，避免重建 `server` 后丢失数据库连接信息
