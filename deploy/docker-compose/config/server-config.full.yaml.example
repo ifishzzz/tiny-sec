@@ -1,5 +1,5 @@
 jwt:
-    signing-key: change_me_signing_key
+    signing-key: qmPlus
     expires-time: 7d
     buffer-time: 1d
     issuer: qmPlus
@@ -16,7 +16,7 @@ zap:
     retention-day: -1
 
 redis:
-    addr: 127.0.0.1:6379
+    addr: redis:6379
     password: ""
     db: 0
     useCluster: false
@@ -24,7 +24,7 @@ redis:
 
 redis-list:
     - name: cache
-      addr: 127.0.0.1:6379
+      addr: redis:6379
       password: ""
       db: 0
       useCluster: false
@@ -73,16 +73,16 @@ captcha:
     key-long: 6
     img-width: 240
     img-height: 80
-    open-captcha: 0
+    open-captcha: 999999
     open-captcha-timeout: 3600
 
 mysql:
-    path: mysql
-    port: "3306"
+    path: ""
+    port: ""
     config: charset=utf8mb4&parseTime=True&loc=Local
-    db-name: gva
-    username: gva
-    password: change_me_app
+    db-name: ""
+    username: ""
+    password: ""
     max-idle-conns: 10
     max-open-conns: 100
     log-mode: error

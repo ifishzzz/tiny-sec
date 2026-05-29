@@ -1,0 +1,17 @@
+:80 {
+    encode zstd gzip
+
+    route {
+        handle_path /api/* {
+            reverse_proxy server:8888
+        }
+
+        handle /api {
+            reverse_proxy server:8888
+        }
+
+        root * /srv
+        try_files {path} /index.html
+        file_server
+    }
+}

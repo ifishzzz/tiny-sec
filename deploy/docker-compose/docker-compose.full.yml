@@ -1,0 +1,75 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: gva-mysql
+    restart: unless-stopped
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    environment:
+      TZ: ${TZ:-Asia/Shanghai}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-Gva@2026Secure!}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-qmPlus}
+      MYSQL_USER: ${MYSQL_USER:-gva}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-Gva@2026Secure!}
+    ports:
+      - "${MYSQL_PORT:-13306}:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-p${MYSQL_ROOT_PASSWORD:-Gva@2026Secure!}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    container_name: gva-redis
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    ports:
+      - "${REDIS_PORT:-16379}:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  server:
+    build:
+      context: ../..
+      dockerfile: deploy/docker/server.full.Dockerfile
+    container_name: gva-server
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      TZ: ${TZ:-Asia/Shanghai}
+    ports:
+      - "${SERVER_PORT:-8888}:8888"
+    volumes:
+      - ${SERVER_CONFIG_FILE:-./config/server-config.full.yaml}:/etc/gva/config.yaml
+      - server_logs:/opt/gva/server/log
+      - server_uploads:/opt/gva/server/uploads/file
+
+  web:
+    build:
+      context: ../..
+      dockerfile: deploy/docker/web.full.Dockerfile
+    container_name: gva-web
+    restart: unless-stopped
+    depends_on:
+      - server
+    ports:
+      - "${WEB_PORT:-8080}:80"
+
+volumes:
+  mysql_data:
+  redis_data:
+  server_logs:
+  server_uploads:

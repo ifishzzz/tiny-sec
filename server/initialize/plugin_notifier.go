@@ -10,6 +10,9 @@ import (
 func init() {
 	// 注入数据库就绪回调到 service 层
 	system.SetDBReadyCallback(func() {
+		// 首次初始化完成后，补跑一次全局自动迁移，确保业务表也被创建。
+		// 这一步在普通启动阶段由 main.go 调用；初始化页成功后需要在这里补齐。
+		RegisterTables()
 		GetDBReadyNotifier().NotifyDBReady()
 	})
 }
